@@ -1,3 +1,4 @@
+import json
 import platform
 import subprocess
 
@@ -125,11 +126,15 @@ def detect_software(OS: str) -> dict | None:
             return result_dict
     # If the platform (OS) is Darwin (macOS)
     elif OS == "Darwin":
-        print(run_command(["system_profiler", "SPApplicationsDataType", "-json"]))
+        command_dict: dict = run_command(
+            ["system_profiler", "SPApplicationsDataType", "-json"]
+        )
+        json_data = json.loads(command_dict["data_or_reason"])
+        print(json_data)
 
 
 def main():
-    print(detect_software(detect_platform()))
+    detect_software(detect_platform())
 
 
 main()
