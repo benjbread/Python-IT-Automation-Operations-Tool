@@ -31,8 +31,10 @@ def detect_software(OS: str) -> dict | None:
     # Create empty list that will hold dict of name, version, and publisher for each installed software
     software_list: list[dict] = []
 
-    result_dict = {}
+    # Create empty result dict that will hold wether it was a success (bool) and the data_or_reason and be returned
+    result_dict: dict = {}
 
+    # If the platform (OS) is Windows
     if OS == "Windows":
         import winreg as wrg
 
@@ -121,10 +123,9 @@ def detect_software(OS: str) -> dict | None:
             result_dict["success"] = False
             result_dict["data_or_reason"] = command_dict["data_or_reason"]
             return result_dict
-    else:
-        result_dict["success"] = False
-        result_dict["data_or_reason"] = "OS not implemented or detected"
-        return result_dict
+    # If the platform (OS) is Darwin (macOS)
+    elif OS == "Darwin":
+        print(run_command(["system_profiler", "SPApplicationsDataType"]))
 
 
 def main():
