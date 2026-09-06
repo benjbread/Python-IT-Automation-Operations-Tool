@@ -1,4 +1,3 @@
-import json
 import platform
 import subprocess
 
@@ -126,15 +125,36 @@ def detect_software(OS: str) -> dict | None:
             return result_dict
     # If the platform (OS) is Darwin (macOS)
     elif OS == "Darwin":
+        import json
+
         command_dict: dict = run_command(
             ["system_profiler", "SPApplicationsDataType", "-json"]
         )
-        json_data = json.loads(command_dict["data_or_reason"])
-        print(json_data)
+        if command_dict["success"]:
+            json_data = json.loads(command_dict["data_or_reason"])
+            json_list = json_data.get("SPApplicationsDataType")
+
+            for software in json_list:
+                software_dict: dict = {}
+                software_dict["name"] = software.get("_name")
+                software_dict["version"] = software.get("version")
+                software_dict["publisher"] = software.get("obtained_from")
+                software_list.append(software_dict)
+
+            result_dict["success"] = True
+            result_dict["data_or_reason"] = software_list
+            return result_dict
+        else:
+            result_dict["success"] = False
+            result_dict["data_or_reason"] = command_dict["data_or_reason"]
+            return result_dict
+    else:
+        result_dict["success"] = False
+        result_dict["data_or_reason"] = "OS net yet implemented"
+        return result_dict
 
 
 def main():
     detect_software(detect_platform())
-
 
 main()
