@@ -30,6 +30,9 @@ def detect_platform() -> str:
 def detect_software(OS: str) -> dict | None:
     # Create empty list that will hold dict of name, version, and publisher for each installed software
     software_list: list[dict] = []
+
+    result_dict = {}
+
     if OS == "Windows":
         import winreg as wrg
 
@@ -38,8 +41,6 @@ def detect_software(OS: str) -> dict | None:
             wrg.HKEY_LOCAL_MACHINE,
             r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
         )
-
-        result_dict = {}
 
         try:
             while True:
@@ -84,9 +85,6 @@ def detect_software(OS: str) -> dict | None:
             return result_dict
     # Otherwise, if the platform (OS) is Linux
     elif OS == "Linux":
-        # Create result_dict that will be returned in end
-        result_dict = {}
-
         # Create a dict from run_command
         command_dict: dict = run_command(
             ["dpkg-query", "-W", "-f=${Package}\t${Version}\t${Maintainer}\n"]
@@ -123,6 +121,10 @@ def detect_software(OS: str) -> dict | None:
             result_dict["success"] = False
             result_dict["data_or_reason"] = command_dict["data_or_reason"]
             return result_dict
+    else:
+        result_dict["success"] = False
+        result_dict["data_or_reason"] = "OS not implemented or detected"
+        return result_dict
 
 
 def main():
