@@ -125,7 +125,7 @@ def detect_software(OS: str) -> dict | None:
             return result_dict
     # If the platform (OS) is Darwin (macOS)
     elif OS == "Darwin":
-        print(run_command(["system_profiler", "SPApplicationsDataType"]))
+        print(run_command(["system_profiler", "SPApplicationsDataType", "-json"]))
 
 
 def main():
