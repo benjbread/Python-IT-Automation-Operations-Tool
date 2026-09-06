@@ -1,0 +1,132 @@
+import platform
+import subprocess
+
+
+def run_command(command_list: list[str]) -> dict:
+    try:
+        result = subprocess.run(
+            command_list, capture_output=True, text=True, check=True, timeout=2
+        )
+        result_dict = {"success": True, "data_or_reason": result.stdout}
+        return result_dict
+    except subprocess.CalledProcessError as err:
+        result_dict = {
+            "success": False,
+            "data_or_reason": f"{err.cmd} failed: {err.stderr}",
+        }
+        return result_dict
+    except subprocess.TimeoutExpired as err:
+        result_dict = {
+            "success": False,
+            "data_or_reason": f"Process timed out after: {err.timeout} seconds",
+        }
+        return result_dict
+
+
+def detect_platform() -> str:
+    return platform.system()
+
+
+def detect_software(OS: str) -> dict | None:
+    # Create empty list that will hold dict of name, version, and publisher for each installed software
+    software_list: list[dict] = []
+    if OS == "Windows":
+        import winreg as wrg
+
+        index: int = 0
+        opened_uninstall = wrg.OpenKey(
+            wrg.HKEY_LOCAL_MACHINE,
+            r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+        )
+
+        result_dict = {}
+
+        try:
+            while True:
+                software_info: dict = {}
+                program_index = wrg.EnumKey(opened_uninstall, index)
+                opened_program_subkey = wrg.OpenKey(opened_uninstall, program_index)
+
+                try:
+                    software_info["name"] = (
+                        wrg.QueryValueEx(opened_program_subkey, "DisplayName")
+                    )[0]
+                except OSError:
+                    software_info["name"] = "Missing Name"
+
+                try:
+                    software_info["version"] = (
+                        wrg.QueryValueEx(opened_program_subkey, "DisplayVersion")
+                    )[0]
+                except OSError:
+                    software_info["version"] = "Missing Version"
+
+                try:
+                    software_info["publisher"] = (
+                        wrg.QueryValueEx(opened_program_subkey, "Publisher")
+                    )[0]
+                except OSError:
+                    software_info["publisher"] = "Missing Publisher"
+
+                finally:
+                    software_list.append(software_info)
+                    wrg.CloseKey(opened_program_subkey)
+                    index += 1
+
+        except OSError:
+            wrg.CloseKey(opened_uninstall)
+            if len(software_list) == 0:
+                result_dict["success"] = False
+                result_dict["data_or_reason"] = "No Software discovered"
+            else:
+                result_dict["success"] = True
+                result_dict["data_or_reason"] = software_list
+            return result_dict
+    # Otherwise, if the platform (OS) is Linux
+    elif OS == "Linux":
+        # Create result_dict that will be returned in end
+        result_dict = {}
+
+        # Create a dict from run_command
+        command_dict: dict = run_command(
+            ["dpkg-query", "-W", "-f=${Package}\t${Version}\t${Maintainer}\n"]
+        )
+
+        if command_dict["success"]:
+            # Create list from the data_or_reason key of command_dict split by newlines
+            data_list: list = command_dict["data_or_reason"].split("\n")
+
+            # For each list in the data_list split it into a new list of name, version, and publisher
+            # Then create a software info dict from the items in the list which is appended to the software list
+            for data in data_list:
+                if len(data) >= 1:
+                    software = data.split("\t")
+                    software_info = {}
+                    software_info["name"] = software[0]
+
+                    try:
+                        software_info["version"] = software[1]
+                    except IndexError:
+                        software_info["version"] = "Error Retrieving"
+
+                    try:
+                        software_info["publisher"] = software[2]
+                    except IndexError:
+                        software_info["publisher"] = "Error Retrieving"
+
+                    software_list.append(software_info)
+
+            result_dict["success"] = True
+            result_dict["data_or_reason"] = software_list
+            return result_dict
+        else:
+            result_dict["success"] = False
+            result_dict["data_or_reason"] = command_dict["data_or_reason"]
+            return result_dict
+
+
+def main():
+    print(detect_software(detect_platform()))
+
+
+main()
