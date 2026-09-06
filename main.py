@@ -27,7 +27,7 @@ def detect_platform() -> str:
     return platform.system()
 
 
-def detect_software(OS: str) -> dict | None:
+def detect_software(OS: str) -> dict:
     # Create empty list that will hold dict of name, version, and publisher for each installed software
     software_list: list[dict] = []
 
@@ -127,7 +127,7 @@ def detect_software(OS: str) -> dict | None:
     elif OS == "Darwin":
         import json
 
-        command_dict: dict = run_command(
+        command_dict = run_command(
             ["system_profiler", "SPApplicationsDataType", "-json"]
         )
         if command_dict["success"]:
@@ -148,6 +148,7 @@ def detect_software(OS: str) -> dict | None:
             result_dict["success"] = False
             result_dict["data_or_reason"] = command_dict["data_or_reason"]
             return result_dict
+    # Else the OS isnt supported yet
     else:
         result_dict["success"] = False
         result_dict["data_or_reason"] = "OS net yet implemented"
@@ -155,6 +156,7 @@ def detect_software(OS: str) -> dict | None:
 
 
 def main():
-    detect_software(detect_platform())
+    print(detect_software(detect_platform()))
+
 
 main()
