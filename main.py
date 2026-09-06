@@ -5,7 +5,7 @@ import subprocess
 def run_command(command_list: list[str]) -> dict:
     try:
         result = subprocess.run(
-            command_list, capture_output=True, text=True, check=True, timeout=2
+            command_list, capture_output=True, text=True, check=True, timeout=60
         )
         result_dict = {"success": True, "data_or_reason": result.stdout}
         return result_dict
