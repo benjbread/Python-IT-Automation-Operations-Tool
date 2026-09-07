@@ -9,7 +9,7 @@ def detect_services(OS: str):
     if OS == "Windows":
         import psutil
 
-        result = psutil.win_service_iter()
+        result = list(psutil.win_service_iter())
 
         print(result)
 
