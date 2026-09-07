@@ -1,7 +1,7 @@
 from .helpers import run_command
 
 
-def detect_software(OS: str):
+def detect_services(OS: str):
     # services_list: list[dict] = []
 
     # Create empty result dict that will hold wether it was a success (bool) and the data_or_reason and be returned
