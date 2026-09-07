@@ -20,6 +20,7 @@ def detect_software(OS: str) -> dict:
             wrg.HKEY_LOCAL_MACHINE,
             r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
         )
+        print(opened_uninstall)
 
         try:
             while True:
