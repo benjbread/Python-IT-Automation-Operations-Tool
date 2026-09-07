@@ -4,7 +4,7 @@ from .software import detect_software
 
 
 def main():
-    print(run_command(["system_profiler", "SPApplicationsDataType", "-json"]))
+    print(detect_software("Darwin"))
 
 
 main()
