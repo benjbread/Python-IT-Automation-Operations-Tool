@@ -4,6 +4,7 @@ from .helpers import run_command
 
 
 def detect_services(OS: str):
+    # Create empty list that will hold dict of name, path, owner, and status for each found service
     service_list: list[dict] = []
 
     # Create empty result dict that will hold wether it was a success (bool) and the data_or_reason and be returned
@@ -18,23 +19,27 @@ def detect_services(OS: str):
         for r in results:
             # Create temp dict to store service_info
             service_info: dict = {}
-            if r.name():
-                service_info["name"] = r.name()
+            name = r.name()
+            if name:
+                service_info["name"] = name
             else:
                 service_info["name"] = "No name found"
 
-            if r.binpath():
-                service_info["path"] = r.binpath()
+            path = r.binpath()
+            if path:
+                service_info["path"] = path
             else:
                 service_info["path"] = "No path found"
 
-            if r.username():
+            username = r.username()
+            try:
                 service_info["owner"] = r.username()
-            else:
-                service_info["owner"] = "No owner found"
+            except Exception as e:
+                service_info["path"] = f"RAISED: {type(e).__name__}: {e}"
 
-            if r.status():
-                service_info["status"] = r.status()
+            status = r.status()
+            if status:
+                service_info["status"] = status
             else:
                 service_info["status"] = "No status found"
 
