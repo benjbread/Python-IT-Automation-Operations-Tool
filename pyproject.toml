@@ -1,0 +1,32 @@
+[project]
+name = "sysinv"
+version = "0.1.0"
+description = "A system inventory tool"
+readme = "README.md"
+authors = [
+    { name = "benjbread", email = "benjbreadon@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = ["psutil >= 6.0.0"]
+
+[build-system]
+requires = ["uv_build>=0.12.7,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.ruff]
+# Sets your wrap limit (adjust 79 to match your preferred Zed line length)
+line-length = 79
+
+[tool.ruff.lint]
+# Add rule codes here to completely turn them off (e.g., "E501" for line length)
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+# Split your multi-line imports and stack them
+force-single-line = false
+# Automatically adds trailing commas to multi-line imports
+split-on-trailing-comma = true
+
+[tool.ruff.format]
+# Ensures the formatter keeps your trailing commas for clean stacking
+skip-magic-trailing-comma = false

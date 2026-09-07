@@ -1,30 +1,4 @@
-import platform
-import subprocess
-
-
-def run_command(command_list: list[str]) -> dict:
-    try:
-        result = subprocess.run(
-            command_list, capture_output=True, text=True, check=True, timeout=60
-        )
-        result_dict = {"success": True, "data_or_reason": result.stdout}
-        return result_dict
-    except subprocess.CalledProcessError as err:
-        result_dict = {
-            "success": False,
-            "data_or_reason": f"{err.cmd} failed: {err.stderr}",
-        }
-        return result_dict
-    except subprocess.TimeoutExpired as err:
-        result_dict = {
-            "success": False,
-            "data_or_reason": f"Process timed out after: {err.timeout} seconds",
-        }
-        return result_dict
-
-
-def detect_platform() -> str:
-    return platform.system()
+from .helpers import run_command
 
 
 def detect_software(OS: str) -> dict:
@@ -48,7 +22,9 @@ def detect_software(OS: str) -> dict:
             while True:
                 software_info: dict = {}
                 program_index = wrg.EnumKey(opened_uninstall, index)
-                opened_program_subkey = wrg.OpenKey(opened_uninstall, program_index)
+                opened_program_subkey = wrg.OpenKey(
+                    opened_uninstall, program_index
+                )
 
                 try:
                     software_info["name"] = (
@@ -59,7 +35,9 @@ def detect_software(OS: str) -> dict:
 
                 try:
                     software_info["version"] = (
-                        wrg.QueryValueEx(opened_program_subkey, "DisplayVersion")
+                        wrg.QueryValueEx(
+                            opened_program_subkey, "DisplayVersion"
+                        )
                     )[0]
                 except OSError:
                     software_info["version"] = "Missing Version"
@@ -151,12 +129,5 @@ def detect_software(OS: str) -> dict:
     # Else the OS isnt supported yet
     else:
         result_dict["success"] = False
-        result_dict["data_or_reason"] = "OS net yet implemented"
+        result_dict["data_or_reason"] = "OS not yet implemented"
         return result_dict
-
-
-def main():
-    print(detect_software(detect_platform()))
-
-
-main()
