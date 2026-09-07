@@ -4,7 +4,7 @@ from .software import detect_software
 
 
 def main():
-    detect_services(detect_platform())
+    print(detect_services(detect_platform()))
 
 
 main()
