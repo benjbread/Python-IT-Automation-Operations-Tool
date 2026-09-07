@@ -13,8 +13,8 @@ def detect_services(OS: str):
         for r in results:
             print(f"{r.name()} A.K.A. {r.display_name()}")
             print(r.binpath())
-            print(r.username())
-            print(r.status())
+            print(f"owned by: {r.username()}")
+            print(f"{r.status()}\n")
 
     elif OS == "Linux":
         pass
