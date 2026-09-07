@@ -11,7 +11,9 @@ def detect_services(OS: str):
 
         results = list(psutil.win_service_iter())
         for r in results:
-            print(r.name())
+            print(f"{r.name()} A.K.A. {r.display_name()}")
+            print(r.binpath())
+            print(r.username())
             print(r.status())
 
     elif OS == "Linux":
