@@ -31,7 +31,6 @@ def detect_software(OS: str) -> dict:
                 opened_program_subkey = wrg.OpenKey(
                     opened_uninstall, program_index
                 )
-                print(opened_program_subkey)
 
                 # try to set the name key for software_info dict from the opened subkeys "DisplayName"
                 try:

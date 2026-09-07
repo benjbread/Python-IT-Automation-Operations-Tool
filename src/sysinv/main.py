@@ -3,7 +3,7 @@ from .software import detect_software
 
 
 def main():
-    print(detect_software(detect_platform()))
+    detect_software(detect_platform())
 
 
 main()

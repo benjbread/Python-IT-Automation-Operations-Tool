@@ -57,27 +57,52 @@ class TestDetectSoftware(TestCase):
         self.assertEqual(result, expected)
 
     @unittest.skipUnless(sys.platform.startswith("win"), "Requires Windows")
-    @patch("wrg.OpenKey")
-    @patch("wrg.EnumKey")
-    @patch("wrg.QueryValueEx")
-    @patch("wrg.CloseKey")
+    @patch("winreg.CloseKey")
+    @patch("winreg.EnumKey")
+    @patch("winreg.QueryValueEx")
+    @patch("winreg.OpenKey")
     def test_windows_detect_software(
-        self, mock_OpenKey, mock_EnumKey, mock_QueryValueEx, mock_CloseKey
+        self, mock_OpenKey, mock_QueryValueEx, mock_EnumKey, mock_CloseKey
     ):
+        def fake_OpenKey(hive, subkey_name):
+            return subkey_name
+
+        def fake_QueryValueEx(handle, field):
+            data = {
+                "7-Zip": {
+                    "DisplayName": "7-Zip 26.02 (x64)",
+                    "DisplayVersion": "26.02",
+                    "Publisher": "Igor Pavlov",
+                },
+                "AddressBook": {
+                    "DisplayName": "Missing Name",
+                    "DisplayVersion": "Missing Version",
+                    "Publisher": "Missing Publisher",
+                },
+            }
+            return (data[handle][field], 1)
+
+        def fake_CloseKey(handle):
+            return None
+
         # Mocks dict of success and data returned from command
-        mock_OpenKey.opened_uninstall.return_value = "<PyHKEY:0x0000000000000234>"
-        mock_EnumKey.return_value = ["7-Zip", "AddressBook", OSError()]
-        mock_OpenKey.opened_program_subkey.return_value = "<PyHKEY:0x0000000000000234>"
-        mock_QueryValueEx.return_value =
-        result: dict = detect_software("Darwin")
+        mock_OpenKey.side_effect = fake_OpenKey
+        mock_CloseKey.side_effect = fake_CloseKey
+        mock_EnumKey.side_effect = ["7-Zip", "AddressBook", OSError()]
+        mock_QueryValueEx.side_effect = fake_QueryValueEx
+        result: dict = detect_software("Windows")
         expected: dict = {
             "success": True,
             "data_or_reason": [
-                {"name": "App Store", "version": "3.0", "publisher": "apple"},
                 {
-                    "name": "Python",
-                    "version": "3.14.7",
-                    "publisher": "identified_developer",
+                    "name": "7-Zip 26.02 (x64)",
+                    "version": "26.02",
+                    "publisher": "Igor Pavlov",
+                },
+                {
+                    "name": "Missing Name",
+                    "version": "Missing Version",
+                    "publisher": "Missing Publisher",
                 },
             ],
         }
