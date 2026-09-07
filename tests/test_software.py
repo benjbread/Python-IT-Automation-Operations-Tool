@@ -65,8 +65,10 @@ class TestDetectSoftware(TestCase):
         self, mock_OpenKey, mock_EnumKey, mock_QueryValueEx, mock_CloseKey
     ):
         # Mocks dict of success and data returned from command
-        mock_OpenKey.return_value = "<PyHKEY:0x0000000000000234>"
-        mock_EnumKey.return_value =
+        mock_OpenKey.opened_uninstall.return_value = "<PyHKEY:0x0000000000000234>"
+        mock_EnumKey.return_value = ["7-Zip", "AddressBook", OSError()]
+        mock_OpenKey.opened_program_subkey.return_value = "<PyHKEY:0x0000000000000234>"
+        mock_QueryValueEx.return_value =
         result: dict = detect_software("Darwin")
         expected: dict = {
             "success": True,

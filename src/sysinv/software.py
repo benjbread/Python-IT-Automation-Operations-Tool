@@ -27,11 +27,11 @@ def detect_software(OS: str) -> dict:
                 software_info: dict = {}
                 # Get back the program subkey at the index for that loop
                 program_index = wrg.EnumKey(opened_uninstall, index)
-                print(program_index)
                 # Open the program subkey for this loop
                 opened_program_subkey = wrg.OpenKey(
                     opened_uninstall, program_index
                 )
+                print(opened_program_subkey)
 
                 # try to set the name key for software_info dict from the opened subkeys "DisplayName"
                 try:
