@@ -1,4 +1,4 @@
-# Python-IT-Automation-Operations-Tool
+# Python-System-Inventory-Tool
 This project is a **WIP** here's the implementation list:
 ### Implemented
 
