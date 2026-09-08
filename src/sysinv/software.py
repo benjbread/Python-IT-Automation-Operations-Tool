@@ -1,19 +1,20 @@
 from .helpers import run_command
 
 
-# returns a dict of wether function succeeded or not, and then the data_or_reason
+# Returns a dict of whether function succeeded and the data_or_reason
 def detect_software(OS: str) -> dict:
     # Create empty list that will hold dict of name, version, and publisher for each installed software
     software_list: list[dict] = []
 
-    # Create empty result dict that will hold wether it was a success (bool) and the data_or_reason and be returned
+    # Create empty result dict that will hold whether it was a success (bool)
+    # and the data_or_reason value to be returned
     result_dict: dict = {}
 
     # If the platform (OS) is Windows
     if OS == "Windows":
         import winreg as wrg
 
-        # create index counter to go through the software subkeys
+        # Create index counter to iterate through software subkeys
         index: int = 0
         # Open the Uninstall key which holds the software subkeys
         opened_uninstall = wrg.OpenKey(
@@ -22,6 +23,7 @@ def detect_software(OS: str) -> dict:
         )
 
         try:
+            # Loop continues until EnumKey raises OSError when no more subkeys are left
             while True:
                 # Create empty dict on each loop to eventually hold the software info
                 software_info: dict = {}
@@ -62,6 +64,7 @@ def detect_software(OS: str) -> dict:
                     software_info["publisher"] = "Missing Publisher"
 
                 # After trying to assign each software_info key append the dict to the list of softwares
+                # finally block guarantees append + close + increment happen even if one field lookup fails
                 finally:
                     software_list.append(software_info)
                     # Close the opened program subkey
@@ -69,7 +72,8 @@ def detect_software(OS: str) -> dict:
                     # Increment the index
                     index += 1
 
-        # Once index has reached value that doesnt exist it means we have reached end of subkeys and OSError is raised.
+        # Once index reaches a value that does not exist, EnumKey raises OSError
+        # which signals we reached the end of subkeys
         except OSError:
             # Close the opened Uninstall Key
             wrg.CloseKey(opened_uninstall)
@@ -81,7 +85,7 @@ def detect_software(OS: str) -> dict:
             else:
                 result_dict["success"] = True
                 result_dict["data_or_reason"] = software_list
-            # return the final dict of wether function succeeded or not, and then the data_or_reason
+            # Return final dict showing whether function succeeded and the data_or_reason
             return result_dict
 
     # Otherwise, if the platform (OS) is Linux
@@ -91,12 +95,12 @@ def detect_software(OS: str) -> dict:
             ["dpkg-query", "-W", "-f=${Package}\t${Version}\t${Maintainer}\n"]
         )
 
-        # if the command ran was sucessful run this
+        # If the command ran successfully, parse output lines
         if command_dict["success"]:
             # Create list from the data_or_reason key of command_dict split by newlines
             data_list: list = command_dict["data_or_reason"].split("\n")
 
-            # For each list in the data_list split it into a new list of name, version, and publisher
+            # For each line in data_list split by tab into name/version/publisher fields
             # Then create a software info dict from the items in the list which is appended to the software list
             for data in data_list:
                 if len(data) >= 1:
@@ -116,12 +120,12 @@ def detect_software(OS: str) -> dict:
 
                     software_list.append(software_info)
 
-            # Once all software_info has been appened to software_list set the result to a success
+            # Once all software_info entries are appended, set result to success
             # and add list to the data_or_reason key of result dict
             result_dict["success"] = True
             result_dict["data_or_reason"] = software_list
             return result_dict
-        # If inital command didnt suceed then set sucess to false and provide reason
+        # If initial command did not succeed, set success to False and provide reason
         else:
             result_dict["success"] = False
             result_dict["data_or_reason"] = command_dict["data_or_reason"]
@@ -136,38 +140,39 @@ def detect_software(OS: str) -> dict:
             ["system_profiler", "SPApplicationsDataType", "-json"]
         )
 
-        # if the command ran was sucessful run this
+        # If the command ran successfully, parse returned JSON
         if command_dict["success"]:
             # Create dict from the json returned in the data_or_reason key from command_dict
             json_data = json.loads(command_dict["data_or_reason"])
-            # Get the value from the jason_data dict with the list of dicts for each software
+            # Get the value from the json_data dict with the list of dicts for each software
             json_list = json_data.get("SPApplicationsDataType")
 
             # for each software in the list from json_list...
+            # .get() is used so missing keys return None instead of raising KeyError
             for software in json_list:
-                # make a temporary software_dict to hold the values
+                # Make a temporary software_dict to hold values for one software item
                 software_dict: dict = {}
-                # get the softwares "name" and set it to the "name" key in software_dict
+                # Get software name and set it to the "name" key in software_dict
                 software_dict["name"] = software.get("_name")
-                # get the softwares "version" and set it to the "version" key in software_dict
+                # Get software version and set it to the "version" key in software_dict
                 software_dict["version"] = software.get("version")
-                # get the softwares "obtained_from" and set it to the "publisher" key in software_dict
+                # Get software obtained_from and set it to the "publisher" key in software_dict
                 software_dict["publisher"] = software.get("obtained_from")
-                # append the temporary dict the the software_list
+                # Append the temporary dict to software_list
                 software_list.append(software_dict)
 
-            # after each software has been iterated through set success to True
+            # After each software item is processed, set success to True
             # and make the software_list the value for data_or_reason in dict
             result_dict["success"] = True
             result_dict["data_or_reason"] = software_list
             return result_dict
-        # If inital command didnt suceed then set sucess to False and provide reason
+        # If initial command did not succeed, set success to False and provide reason
         else:
             result_dict["success"] = False
             result_dict["data_or_reason"] = command_dict["data_or_reason"]
             return result_dict
 
-    # Else the OS isnt supported yet
+    # Else the OS is not supported yet
     else:
         result_dict["success"] = False
         result_dict["data_or_reason"] = "OS not yet implemented"
