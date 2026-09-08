@@ -1,4 +1,47 @@
 # Python-IT-Automation-Operations-Tool
+This project is a **WIP** here's the implementation list:
+### Implemented
+
+- `src/sysinv/helpers.py`
+  - `run_command()` helper (subprocess wrapper with success/failure dict contract)
+
+- `src/sysinv/platform_info.py`
+  - `detect_platform()` implemented
+
+- `src/sysinv/software.py`
+  - `detect_software(OS)` implemented for:
+    - Windows
+    - Linux
+    - Darwin (macOS)
+  - Uses the project return contract (`success` + `data_or_reason`)
+
+- `src/sysinv/services.py`
+  - `detect_services(OS)` implemented for:
+    - Windows
+    - Linux
+  - Linux branch currently includes parsing logic for `systemctl list-units` + `systemctl show`
+  - Darwin branch is still unimplemented (`pass`)
+
+- `src/sysinv/main.py`
+  - Runs and prints `detect_services(detect_platform())` currently (detect servies for your machine)
+
+- `tests/test_software.py`
+  - Tests exist for software detection:
+    - Linux (mocked)
+    - Darwin (mocked)
+    - Windows (`skipUnless` + winreg mocks)
+
+### Not implemented / placeholders
+
+- `src/sysinv/processes.py` (empty)
+- `src/sysinv/hardware.py` (empty)
+- `src/sysinv/accounts.py` (empty)
+- `src/sysinv/config_attr.py` (empty)
+
+### Missing tests
+
+- No `tests/test_services.py` yet
+- No tests yet for processes/hardware/accounts/config_attr modules
 
 ## AI Disclosure
 
